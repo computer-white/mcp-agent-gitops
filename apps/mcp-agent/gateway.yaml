@@ -1,6 +1,4 @@
-# --- AI Gateway Service ---
-# 使用 NodePort 暴露服务，方便浏览器访问
-apiVersion: v1
+apiVersion: apps/v1
 kind: Service
 metadata:
   name: ai-gateway-service
@@ -10,12 +8,11 @@ spec:
   ports:
   - port: 3000
     targetPort: 3000
-    nodePort: 30080 # 固定端口，方便记忆
+    nodePort: 30080
   selector:
     app: ai-gateway
 
 ---
-# --- AI Gateway Deployment ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,8 +30,16 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: ai-gateway:v1
-        imagePullPolicy: IfNotPresent # 同样使用本地镜像
+        image: ai-gateway:v2
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
-        # Gateway 代码中硬编码了连接地址，所以这里不需要环境变量
+        env:
+        - name: MCP_SERVER_URL
+          value: "http://mcp-server-service.ai-services.svc.cluster.local:8080/sse"
+        - name: OLLAMA_URL
+          value: "http://ollama-service.ai-services.svc.cluster.local:11434"
+        - name: OLLAMA_MODEL
+          value: "qwen3.5:4b"
+        - name: GATEWAY_PORT
+          value: "3000"
