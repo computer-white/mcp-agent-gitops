@@ -99,6 +99,7 @@ metadata:
   name: mysql-service
   namespace: ai-services
 spec:
+  type: NodePort
   ports:
   - port: 3306
   selector:
